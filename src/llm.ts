@@ -1,7 +1,11 @@
 import OpenAI from "openai";
+import type { ParsedSyllabus } from "./types";
+
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export async function extractSyllabusStructure(syllabusText) {
+export async function extractSyllabusStructure(
+  syllabusText: string
+): Promise<ParsedSyllabus> {
   const prompt = `
 You are a syllabus parser. The user will give you the full text of a university course syllabus.
 
@@ -33,15 +37,23 @@ Syllabus text:
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
     temperature: 0,
-    response_format: { type: "json_object" } // Force JSON response
+    response_format: { type: "json_object" }, // Force JSON response
   });
 
-  const content = response.choices[0].message.content;
-  
+  const content = response.choices[0]?.message?.content;
+
+  if (!content) {
+    throw new Error("Empty response from OpenAI");
+  }
+
   try {
-    return JSON.parse(content);
-  } catch (parseError) {
+    return JSON.parse(content) as ParsedSyllabus;
+  } catch (parseError: any) {
+    // Log the raw content for debugging on the server side
+    // eslint-disable-next-line no-console
     console.error("Failed to parse LLM response:", content);
-    throw new Error(`Failed to parse LLM response as JSON: ${parseError.message}`);
+    throw new Error(
+      `Failed to parse LLM response as JSON: ${parseError?.message ?? parseError}`
+    );
   }
 }

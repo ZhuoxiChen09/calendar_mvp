@@ -1,6 +1,6 @@
 # Calendar MVP
 
-A Node.js API server that parses university course syllabi and returns prioritized task lists based on due dates and assignment weights. The API supports both text input and PDF file uploads.
+A Node.js + TypeScript API server that parses university course syllabi and returns prioritized task lists based on due dates and assignment weights. The API supports both text input and PDF file uploads.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ A Node.js API server that parses university course syllabi and returns prioritiz
    ```
 
 2. Create a `.env` file in the project root:
-   ```
+   ```bash
    OPENAI_API_KEY=your_openai_api_key_here
    PORT=3000
    ```
@@ -25,12 +25,19 @@ A Node.js API server that parses university course syllabi and returns prioritiz
 
 ## Running the Server
 
+The project uses TypeScript with source in `src/` and compiled output in `dist/`.
+
+To build and start the server:
+
 ```bash
 npm start
 ```
 
-The server will start on port 3000. You should see:
-```
+This will run `tsc` to compile `src/` to `dist/` and then start `dist/server.js`.
+
+The server will start on port 3000. You should see something like:
+
+```text
 Server listening on port 3000
 Local: http://localhost:3000
 Network: http://192.168.1.XXX:3000
@@ -41,16 +48,17 @@ Network: http://192.168.1.XXX:3000
 Make sure the server is running, then in a separate terminal:
 
 ```bash
-node test-api.js
+npm run test-api
 ```
 
 This will:
+- Build the TypeScript (`npm run build`)
 - Test the API with **four built‑in text syllabus variants**
 - Test the API with **real PDF syllabi** from the `syllabus/` folder (see below).
 
 ### PDF test files
 
-`test-api.js` expects these files to exist under a `syllabus/` directory in the project root:
+`src/test-api.ts` (compiled to `dist/test-api.js`) expects these files to exist under a `syllabus/` directory in the project root:
 
 - `syllabus/158 Syllabus F25.pdf`
 - `syllabus/Fall2025_142A_syllabus.pdf`
@@ -58,7 +66,7 @@ This will:
 
 You can either:
 - Place your real syllabi at those paths, or
-- Edit the `pdfFiles` array in `test-api.js` to point to your own filenames.
+- Edit the `pdfFiles` array in `src/test-api.ts` to point to your own filenames.
 
 ## API Endpoints
 
@@ -104,14 +112,20 @@ Health check endpoint. Returns server status.
 
 ## Project Structure
 
-```
+```text
 calendar_mvp/
-├── server.js          # Express server and API routes
-├── llm.js             # OpenAI integration for syllabus parsing
-├── priority.js        # Priority calculation logic
-├── test-api.js        # Test script
+├── src/
+│   ├── server.ts      # Express server and API routes
+│   ├── llm.ts         # OpenAI integration for syllabus parsing
+│   ├── priority.ts    # Priority calculation logic
+│   ├── types.ts       # Shared TypeScript types
+│   └── test-api.ts    # Test script
+├── syllabus/          # Sample syllabus PDFs used by tests
+├── dist/              # Compiled JavaScript output (auto-generated)
 ├── package.json       # Dependencies and scripts
-└── .env              # Environment variables (create this)
+├── tsconfig.json      # TypeScript configuration
+├── .env               # Environment variables (create this)
+└── .gitignore         # Ignore dist/, node_modules/, .env, etc.
 ```
 
 ## Troubleshooting
