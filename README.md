@@ -68,6 +68,45 @@ You can either:
 - Place your real syllabi at those paths, or
 - Edit the `pdfFiles` array in `src/test-api.ts` to point to your own filenames.
 
+## Web Frontend (local webpage)
+
+A React + TypeScript web app lives in the `web/` folder. It lets you either:
+- **Paste syllabus text**, or
+- **Upload a local PDF**
+
+and then displays the prioritized tasks returned by the backend.
+
+### Running the web app
+
+1. From the project root, make sure dependencies are installed (once):
+   ```bash
+   npm install
+   ```
+
+2. Start the backend API (in one terminal):
+   ```bash
+   npm start
+   ```
+
+3. Start the web app (in another terminal):
+   ```bash
+   cd web
+   npm install      # first time only
+   npm run dev
+   ```
+
+4. Open the URL shown by Vite (usually `http://localhost:5173`).
+
+### Using the web app
+
+- **Mode toggle** at the top lets you choose:
+  - **Paste Text**: paste raw syllabus text into a textarea and click **Parse Syllabus**.
+  - **Upload PDF**: select a `.pdf` (max 10MB); the app sends it to `/api/parse-syllabus-pdf`.
+- The results section shows:
+  - Course name
+  - List of tasks sorted by priority
+  - Due date, days left, weight, and priority score for each task.
+
 ## API Endpoints
 
 ### POST /api/parse-syllabus-text
