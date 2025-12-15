@@ -3,10 +3,13 @@ import "dotenv/config"; // Load .env before any other imports
 import express from "express";
 import bodyParser from "body-parser";
 import multer from "multer";
-import pdfParse from "pdf-parse";
+import { createRequire } from "module";
 import { extractSyllabusStructure } from "./llm.js";
 import { computePriorities } from "./priority.js";
 import { networkInterfaces } from "os";
+
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 
 const app = express();
 app.use(bodyParser.json({ limit: "2mb" })); // to accept large text
