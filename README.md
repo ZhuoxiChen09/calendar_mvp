@@ -44,7 +44,21 @@ Make sure the server is running, then in a separate terminal:
 node test-api.js
 ```
 
-This will test the API with multiple syllabus formats and display the results.
+This will:
+- Test the API with **four built‑in text syllabus variants**
+- Test the API with **real PDF syllabi** from the `syllabus/` folder (see below).
+
+### PDF test files
+
+`test-api.js` expects these files to exist under a `syllabus/` directory in the project root:
+
+- `syllabus/158 Syllabus F25.pdf`
+- `syllabus/Fall2025_142A_syllabus.pdf`
+- `syllabus/Syllabus_COGS_107b_ Fa25.pdf`
+
+You can either:
+- Place your real syllabi at those paths, or
+- Edit the `pdfFiles` array in `test-api.js` to point to your own filenames.
 
 ## API Endpoints
 
@@ -112,3 +126,15 @@ calendar_mvp/
 
 **Port already in use:**
 - Change the `PORT` value in your `.env` file
+
+**PDF tests fail with `pdfParse is not a function` or `getDocument - no 'url' parameter provided.`**
+- This project is pinned to `pdf-parse@1.1.1` and uses its **function-style API**:
+  - Import: `import pdfParse from "pdf-parse";`
+  - Usage: `const pdfData = await pdfParse(pdfBuffer);`
+- If you upgrade `pdf-parse` to a newer major version, you may need to update the import and usage in `test-api.js` to match the new API.
+
+**PDF tests fail with `ENOENT: no such file or directory, open '...test/data/05-versions-space.pdf'`**
+- Some versions of `pdf-parse` enable an internal "debug mode" that tries to open a bundled test PDF.
+- In `node_modules/pdf-parse/index.js`, set:
+  - `let isDebugMode = false;`
+- Then rerun `node test-api.js`.

@@ -1,4 +1,11 @@
 // test-api.js - Simple script to test the syllabus parsing API
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import pdfParse from "pdf-parse";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Variant 1: Simple numbered list format
 const testSyllabus1 = `
@@ -77,6 +84,17 @@ const testCases = [
   { name: "Variant 4: Bullet Points", syllabus: testSyllabus4 }
 ];
 
+// Function to read and parse PDF from local file
+async function readPDFFromFile(filePath) {
+  try {
+    const pdfBuffer = readFileSync(filePath);
+    const pdfData = await pdfParse(pdfBuffer);
+    return pdfData.text;
+  } catch (error) {
+    throw new Error(`Failed to read PDF from ${filePath}: ${error.message}`);
+  }
+}
+
 async function testAPI(syllabusText, testName) {
   try {
     console.log(`\n${'='.repeat(60)}`);
@@ -94,12 +112,12 @@ async function testAPI(syllabusText, testName) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ HTTP Error ${response.status}:`, errorText);
+      console.error(`HTTP Error ${response.status}:`, errorText);
       return false;
     }
 
     const data = await response.json();
-    console.log('\n✅ Success! Response:');
+    console.log('\nSuccess! Response:');
     console.log(`Course: ${data.course}`);
     console.log(`Tasks found: ${data.tasks.length}`);
     console.log('\nTop 3 prioritized tasks:');
@@ -108,7 +126,51 @@ async function testAPI(syllabusText, testName) {
     });
     return true;
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error('Error:', error.message);
+    console.error('Make sure the server is running on port 3000!');
+    if (error.cause) {
+      console.error('Cause:', error.cause);
+    }
+    return false;
+  }
+}
+
+async function testPDFFromFile(filePath, testName) {
+  try {
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`Testing: ${testName}`);
+    console.log(`Reading PDF: ${filePath}`);
+    console.log('='.repeat(60));
+    
+    const syllabusText = await readPDFFromFile(filePath);
+    console.log(`Extracted ${syllabusText.length} characters from PDF`);
+    console.log('Sending request to http://localhost:3000/api/parse-syllabus-text...');
+    
+    const response = await fetch('http://localhost:3000/api/parse-syllabus-text', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ syllabusText })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`HTTP Error ${response.status}:`, errorText);
+      return false;
+    }
+
+    const data = await response.json();
+    console.log('\nSuccess! Response:');
+    console.log(`Course: ${data.course}`);
+    console.log(`Tasks found: ${data.tasks.length}`);
+    console.log('\nTop 3 prioritized tasks:');
+    data.tasks.slice(0, 3).forEach((task, idx) => {
+      console.log(`  ${idx + 1}. ${task.name} (${task.type}) - Due: ${task.due_date} - Priority: ${task.priority.toFixed(2)}`);
+    });
+    return true;
+  } catch (error) {
+    console.error('Error:', error.message);
     console.error('Make sure the server is running on port 3000!');
     if (error.cause) {
       console.error('Cause:', error.cause);
@@ -118,21 +180,43 @@ async function testAPI(syllabusText, testName) {
 }
 
 async function runAllTests() {
-  console.log('\n🧪 Running all test variants...\n');
+  console.log('\nRunning all test variants...\n');
   
   const results = [];
+  
+  // Test with made-up syllabus variants
   for (const testCase of testCases) {
     const success = await testAPI(testCase.syllabus, testCase.name);
     results.push({ name: testCase.name, success });
-    // Small delay between tests
     await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  
+  // Test with real PDFs from syllabus folder
+  const syllabusDir = join(__dirname, 'syllabus');
+  const pdfFiles = [
+    '158 Syllabus F25.pdf',
+    'Fall2025_142A_syllabus.pdf',
+    'Syllabus_COGS_107b_ Fa25.pdf'
+  ];
+  
+  for (const pdfFile of pdfFiles) {
+    const pdfPath = join(syllabusDir, pdfFile);
+    try {
+      // Check if file exists
+      readFileSync(pdfPath);
+      const success = await testPDFFromFile(pdfPath, `Real PDF: ${pdfFile}`);
+      results.push({ name: `Real PDF: ${pdfFile}`, success });
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (error) {
+      console.log(`\nSkipping ${pdfFile}: File not found`);
+    }
   }
   
   console.log(`\n${'='.repeat(60)}`);
   console.log('Test Summary:');
   console.log('='.repeat(60));
   results.forEach((result, idx) => {
-    console.log(`${idx + 1}. ${result.name}: ${result.success ? '✅ PASSED' : '❌ FAILED'}`);
+    console.log(`${idx + 1}. ${result.name}: ${result.success ? 'PASSED' : 'FAILED'}`);
   });
   const passed = results.filter(r => r.success).length;
   console.log(`\nTotal: ${passed}/${results.length} tests passed`);
