@@ -152,7 +152,7 @@ Health check endpoint. Returns server status.
 ## Project Structure
 
 ```text
-calendar_mvp/
+calendar_mvp
 ├── src/
 │   ├── server.ts      # Express server and API routes
 │   ├── llm.ts         # OpenAI integration for syllabus parsing
