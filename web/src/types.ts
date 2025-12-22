@@ -27,3 +27,4 @@ export interface ParseResponse {
   tasks: PrioritizedTask[];
   totalTasks: number;
 }
+
