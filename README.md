@@ -45,28 +45,25 @@ Network: http://192.168.1.XXX:3000
 
 ## Testing
 
-Make sure the server is running, then in a separate terminal:
+Unit tests for the priority logic run without a server or API key:
+
+```bash
+npm test
+```
+
+This compiles the TypeScript and runs `src/priority.test.ts` with Node's built-in test runner. GitHub Actions runs `npm ci` and `npm test` on every push and pull request.
+
+To exercise the live API, start the server, then in a separate terminal:
 
 ```bash
 npm run test-api
 ```
 
-This will:
-- Build the TypeScript (`npm run build`)
-- Test the API with **four built‑in text syllabus variants**
-- Test the API with **real PDF syllabi** from the `syllabus/` folder (see below).
+This builds the TypeScript and sends four built-in text syllabus variants to the API.
 
-### PDF test files
+### Optional PDF test files
 
-`src/test-api.ts` (compiled to `dist/test-api.js`) expects these files to exist under a `syllabus/` directory in the project root:
-
-- `syllabus/158 Syllabus F25.pdf`
-- `syllabus/Fall2025_142A_syllabus.pdf`
-- `syllabus/Syllabus_COGS_107b_ Fa25.pdf`
-
-You can either:
-- Place your real syllabi at those paths, or
-- Edit the `pdfFiles` array in `src/test-api.ts` to point to your own filenames.
+`src/test-api.ts` also looks for PDF syllabi in a local `syllabus/` directory in the project root and skips any that are missing. Syllabus PDFs are not committed (`syllabus/*.pdf` is in `.gitignore`), so add your own and edit the `pdfFiles` array in `src/test-api.ts` to match their filenames.
 
 ## Web Frontend (local webpage)
 
@@ -158,8 +155,10 @@ calendar_mvp
 │   ├── llm.ts         # OpenAI integration for syllabus parsing
 │   ├── priority.ts    # Priority calculation logic
 │   ├── types.ts       # Shared TypeScript types
-│   └── test-api.ts    # Test script
-├── syllabus/          # Sample syllabus PDFs used by tests
+│   ├── priority.test.ts # Unit tests (npm test)
+│   └── test-api.ts    # Live API test script
+├── syllabus/          # Local syllabus PDFs for test-api (gitignored)
+├── .github/workflows/ # CI: npm ci + npm test
 ├── dist/              # Compiled JavaScript output (auto-generated)
 ├── package.json       # Dependencies and scripts
 ├── tsconfig.json      # TypeScript configuration

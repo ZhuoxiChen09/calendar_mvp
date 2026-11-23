@@ -1,3 +1,6 @@
 node_modules/
 dist/
 .env
+
+# Local syllabus PDFs (contain instructor contact details; keep out of git)
+syllabus/*.pdf
