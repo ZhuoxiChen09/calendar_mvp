@@ -15,7 +15,7 @@ A Node.js + TypeScript API server that parses university course syllabi and retu
    npm install
    ```
 
-2. Create a `.env` file in the project root:
+2. Copy `.env.example` to `.env` in the project root and set your key:
    ```bash
    OPENAI_API_KEY=your_openai_api_key_here
    PORT=3000
@@ -151,7 +151,9 @@ Health check endpoint. Returns server status.
 ```text
 calendar_mvp
 ├── src/
-│   ├── server.ts      # Express server and API routes
+│   ├── server.ts      # Server startup
+│   ├── app.ts         # Express application and routes
+│   ├── api.test.ts    # API tests with a stubbed extractor
 │   ├── llm.ts         # OpenAI integration for syllabus parsing
 │   ├── priority.ts    # Priority calculation logic
 │   ├── types.ts       # Shared TypeScript types
@@ -159,12 +161,16 @@ calendar_mvp
 │   └── test-api.ts    # Live API test script
 ├── syllabus/          # Local syllabus PDFs for test-api (gitignored)
 ├── .github/workflows/ # CI: npm ci + npm test
-├── dist/              # Compiled JavaScript output (auto-generated)
+├── dist/              # Compiled JavaScript output (generated, not committed)
 ├── package.json       # Dependencies and scripts
 ├── tsconfig.json      # TypeScript configuration
-├── .env               # Environment variables (create this)
+├── .env               # Local environment variables (not committed)
 └── .gitignore         # Ignore dist/, node_modules/, .env, etc.
 ```
+
+## Web API configuration
+
+Copy `web/.env.example` to `web/.env` to override `VITE_API_URL`. The default is `http://localhost:3000`. Restart Vite after changing the file.
 
 ## Troubleshooting
 
@@ -174,7 +180,7 @@ calendar_mvp
 
 **Connection refused when testing:**
 - Make sure the server is running (`npm start`)
-- Run the test script in a separate terminal
+- Run `npm run test-api` in a separate terminal
 
 **Port already in use:**
 - Change the `PORT` value in your `.env` file
@@ -183,10 +189,4 @@ calendar_mvp
 - This project is pinned to `pdf-parse@1.1.1` and uses its **function-style API**:
   - Import: `import pdfParse from "pdf-parse";`
   - Usage: `const pdfData = await pdfParse(pdfBuffer);`
-- If you upgrade `pdf-parse` to a newer major version, you may need to update the import and usage in `test-api.js` to match the new API.
-
-**PDF tests fail with `ENOENT: no such file or directory, open '...test/data/05-versions-space.pdf'`**
-- Some versions of `pdf-parse` enable an internal "debug mode" that tries to open a bundled test PDF.
-- In `node_modules/pdf-parse/index.js`, set:
-  - `let isDebugMode = false;`
-- Then rerun `node test-api.js`.
+- If you upgrade `pdf-parse` to a newer major version, you may need to update the import and usage in `src/test-api.ts` to match the new API.

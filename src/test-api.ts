@@ -1,3 +1,4 @@
+import type { PrioritizedTask } from "./types";
 // test-api.ts - Simple script to test the syllabus parsing API
 import { readFileSync } from "fs";
 import path from "path";
@@ -86,8 +87,8 @@ async function readPDFFromFile(filePath: string): Promise<string> {
     const pdfBuffer = readFileSync(filePath);
     const pdfData = await pdfParse(pdfBuffer);
     return pdfData.text;
-  } catch (error: any) {
-    throw new Error(`Failed to read PDF from ${filePath}: ${error.message}`);
+  } catch (error) {
+    throw new Error(`Failed to read PDF from ${filePath}: ${(error instanceof Error ? error.message : String(error))}`);
   }
 }
 
@@ -122,7 +123,7 @@ async function testAPI(
       return false;
     }
 
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as { course: string; totalTasks: number; tasks: PrioritizedTask[] };
     // eslint-disable-next-line no-console
     console.log("\nSuccess! Response:");
     // eslint-disable-next-line no-console
@@ -131,7 +132,7 @@ async function testAPI(
     console.log(`Tasks found: ${data.tasks.length}`);
     // eslint-disable-next-line no-console
     console.log("\nTop 3 prioritized tasks:");
-    data.tasks.slice(0, 3).forEach((task: any, idx: number) => {
+    data.tasks.slice(0, 3).forEach((task, idx) => {
       // eslint-disable-next-line no-console
       console.log(
         `  ${idx + 1}. ${task.name} (${task.type}) - Due: ${
@@ -140,14 +141,15 @@ async function testAPI(
       );
     });
     return true;
-  } catch (error: any) {
+  } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("Error:", error.message);
+    console.error("Error:", (error instanceof Error ? error.message : String(error)));
     // eslint-disable-next-line no-console
     console.error("Make sure the server is running on port 3000!");
-    if (error.cause) {
+    const cause = error instanceof Error && "cause" in error ? error.cause : undefined;
+    if (cause) {
       // eslint-disable-next-line no-console
-      console.error("Cause:", error.cause);
+      console.error("Cause:", cause);
     }
     return false;
   }
@@ -190,7 +192,7 @@ async function testPDFFromFile(
       return false;
     }
 
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as { course: string; totalTasks: number; tasks: PrioritizedTask[] };
     // eslint-disable-next-line no-console
     console.log("\nSuccess! Response:");
     // eslint-disable-next-line no-console
@@ -199,7 +201,7 @@ async function testPDFFromFile(
     console.log(`Tasks found: ${data.tasks.length}`);
     // eslint-disable-next-line no-console
     console.log("\nTop 3 prioritized tasks:");
-    data.tasks.slice(0, 3).forEach((task: any, idx: number) => {
+    data.tasks.slice(0, 3).forEach((task, idx) => {
       // eslint-disable-next-line no-console
       console.log(
         `  ${idx + 1}. ${task.name} (${task.type}) - Due: ${
@@ -208,14 +210,15 @@ async function testPDFFromFile(
       );
     });
     return true;
-  } catch (error: any) {
+  } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("Error:", error.message);
+    console.error("Error:", (error instanceof Error ? error.message : String(error)));
     // eslint-disable-next-line no-console
     console.error("Make sure the server is running on port 3000!");
-    if (error.cause) {
+    const cause = error instanceof Error && "cause" in error ? error.cause : undefined;
+    if (cause) {
       // eslint-disable-next-line no-console
-      console.error("Cause:", error.cause);
+      console.error("Cause:", cause);
     }
     return false;
   }

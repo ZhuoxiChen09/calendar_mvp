@@ -1,7 +1,34 @@
 import OpenAI from "openai";
+import { z } from "zod";
 import type { ParsedSyllabus } from "./types";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const assignmentSchema = z.object({
+  name: z.string(),
+  type: z.enum(["homework", "exam", "project", "quiz", "reading"]),
+  due_date: z.iso.date().nullable(),
+  weight_percent: z.number().nullable(),
+});
+
+const syllabusSchema = z.object({
+  course_name: z.string(),
+  assignments: z.array(z.unknown()),
+});
+
+export function parseSyllabusResponse(content: string): ParsedSyllabus {
+  try {
+    const syllabus = syllabusSchema.parse(JSON.parse(content));
+    return {
+      course_name: syllabus.course_name,
+      assignments: syllabus.assignments.flatMap((assignment) => {
+        const result = assignmentSchema.safeParse(assignment);
+        return result.success ? [result.data] : [];
+      }),
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse LLM response as JSON: ${message}`);
+  }
+}
 
 export async function extractSyllabusStructure(
   syllabusText: string
@@ -33,6 +60,7 @@ Syllabus text:
 """${syllabusText}"""
 `;
 
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
@@ -46,14 +74,5 @@ Syllabus text:
     throw new Error("Empty response from OpenAI");
   }
 
-  try {
-    return JSON.parse(content) as ParsedSyllabus;
-  } catch (parseError: any) {
-    // Log the raw content for debugging on the server side
-    // eslint-disable-next-line no-console
-    console.error("Failed to parse LLM response:", content);
-    throw new Error(
-      `Failed to parse LLM response as JSON: ${parseError?.message ?? parseError}`
-    );
-  }
+  return parseSyllabusResponse(content);
 }
