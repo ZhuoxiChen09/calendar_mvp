@@ -1,6 +1,5 @@
 import "dotenv/config"; // Load .env before any other imports
 import express, { Request, Response } from "express";
-import bodyParser from "body-parser";
 import multer from "multer";
 import cors from "cors";
 import { networkInterfaces } from "os";
@@ -11,7 +10,7 @@ import { computePriorities } from "./priority";
 
 const app = express();
 app.use(cors()); // Enable CORS for all routes
-app.use(bodyParser.json({ limit: "2mb" })); // to accept large text
+app.use(express.json({ limit: "2mb" })); // to accept large text
 
 // Configure multer for file uploads (PDFs)
 const upload = multer({
@@ -45,8 +44,6 @@ app.listen(PORT, () => {
   console.log(`Local: http://localhost:${PORT}`);
   // eslint-disable-next-line no-console
   console.log(`Network: http://${localIP}:${PORT}`);
-  // eslint-disable-next-line no-console
-  console.log(`\nFor Expo app, use: http://${localIP}:${PORT}`);
 });
 
 // Health check endpoint

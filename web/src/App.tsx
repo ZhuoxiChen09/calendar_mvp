@@ -2,8 +2,9 @@ import { useState, useRef } from 'react'
 import './App.css'
 import type { ParseResponse, PrioritizedTask } from './types'
 
-const API_TEXT_URL = 'http://localhost:3000/api/parse-syllabus-text'
-const API_PDF_URL = 'http://localhost:3000/api/parse-syllabus-pdf'
+const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+const API_TEXT_URL = `${API_BASE_URL}/api/parse-syllabus-text`
+const API_PDF_URL = `${API_BASE_URL}/api/parse-syllabus-pdf`
 
 type InputMode = 'text' | 'pdf'
 
