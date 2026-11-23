@@ -151,7 +151,9 @@ Health check endpoint. Returns server status.
 ```text
 calendar_mvp
 ├── src/
-│   ├── server.ts      # Express server and API routes
+│   ├── server.ts      # Server startup
+│   ├── app.ts         # Express application and routes
+│   ├── api.test.ts    # API tests with a stubbed extractor
 │   ├── llm.ts         # OpenAI integration for syllabus parsing
 │   ├── priority.ts    # Priority calculation logic
 │   ├── types.ts       # Shared TypeScript types
