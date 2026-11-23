@@ -52,11 +52,11 @@ export function createApp(extract = extractSyllabusStructure) {
         tasks,
         totalTasks: tasks.length,
       });
-    } catch (err: any) {
+    } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Error parsing syllabus:", err);
 
-      const message: string | undefined = err?.message;
+      const message = err instanceof Error ? err.message : undefined;
 
       // Handle specific error types
       if (message?.includes("JSON")) {
@@ -125,11 +125,11 @@ export function createApp(extract = extractSyllabusStructure) {
           totalTasks: tasks.length,
           source: "pdf",
         });
-      } catch (err: any) {
+      } catch (err) {
         // eslint-disable-next-line no-console
         console.error("Error parsing PDF:", err);
 
-        const message: string | undefined = err?.message;
+        const message = err instanceof Error ? err.message : undefined;
 
         if (message?.includes("Invalid PDF")) {
           return res.status(400).json({
