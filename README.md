@@ -2,6 +2,8 @@
 
 A Node.js + TypeScript API server that parses university course syllabi and returns prioritized task lists based on due dates and assignment weights. The API supports both text input and PDF file uploads.
 
+For an API-key-free check of the scoring logic and HTTP routes, run `npm ci` followed by `npm test`. The [endpoint tests](src/api.test.ts) inject a syllabus extractor and exercise invalid text, rejected uploads, and a successful request.
+
 ## Prerequisites
 
 - Node.js (v18 or higher)
@@ -51,7 +53,7 @@ Unit tests for the priority logic run without a server or API key:
 npm test
 ```
 
-This compiles the TypeScript and runs `src/priority.test.ts` with Node's built-in test runner. GitHub Actions runs `npm ci` and `npm test` on every push and pull request.
+This compiles the TypeScript and runs the scoring and API tests with Node's built-in test runner. GitHub Actions runs `npm ci` and `npm test` on every push and pull request.
 
 To exercise the live API, start the server, then in a separate terminal:
 
@@ -117,19 +119,19 @@ Parses syllabus text and returns prioritized tasks.
 }
 ```
 
-**Response:**
+**Example response** for one assignment from the [fixed-date scoring tests](src/priority.test.ts), evaluated on January 10, 2025:
 ```json
 {
-  "course": "Course Name",
+  "course": "TEST 101",
   "tasks": [
     {
-      "course_name": "Course Name",
-      "name": "Assignment Name",
+      "course_name": "TEST 101",
+      "name": "Homework 1",
       "type": "homework",
-      "due_date": "2024-10-15",
-      "weight_percent": 10,
-      "days_left": 5.5,
-      "priority": 3.5
+      "due_date": "2025-01-11",
+      "weight_percent": 5,
+      "days_left": 1,
+      "priority": 1.5
     }
   ],
   "totalTasks": 5
